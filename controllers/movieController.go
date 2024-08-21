@@ -39,6 +39,21 @@ func GetMovies(client *mongo.Client) http.HandlerFunc {
     }
 }
 
+func GetMovie(client *mongo.Client) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        params := mux.Vars(r)
+        id, _ := primitive.ObjectIDFromHex(params["id"])
+
+        movie, err := services.GetMovie(client, id)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
+        json.NewEncoder(w).Encode(movie)
+    }
+}
+
 func UpdateMovie(client *mongo.Client) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         params := mux.Vars(r)

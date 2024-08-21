@@ -40,6 +40,16 @@ func GetMovies(client *mongo.Client) ([]models.Movie, error) {
     return movies, nil
 }
 
+func GetMovie(client *mongo.Client, id primitive.ObjectID) (models.Movie, error) {
+    collection := client.Database("movieDB").Collection("movies")
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    var movie models.Movie
+    err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&movie)
+    return movie, err
+}
+
 func UpdateMovie(client *mongo.Client, id primitive.ObjectID, update bson.M) (*mongo.UpdateResult, error) {
     collection := client.Database("movieDB").Collection("movies")
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
