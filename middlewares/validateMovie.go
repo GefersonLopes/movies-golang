@@ -39,18 +39,15 @@ func ValidateCreateMovie(movie models.Movie) error {
 }
 
 func ValidadeParamSearchMovie(id primitive.ObjectID) error {
-	errosList := []interface{}{"", 0, nil}
-	
-	for _, error := range errosList {
-		if id == error {
-			return &ValidationError{
-				Message: "id is required",
-				StatusCode: http.StatusBadRequest,
-			}
+	if id == primitive.NilObjectID {
+		return &ValidationError{
+			Message: "id is required",
+			StatusCode: http.StatusBadRequest,
 		}
 	}
 	return nil
-}	
+}
+
 
 func ReturnNotFoundMovie() error {
 	return &ValidationError{
