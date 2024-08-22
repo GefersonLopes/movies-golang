@@ -24,6 +24,7 @@ func CreateMovie(client *mongo.Client) http.HandlerFunc {
             return
         }
 
+
         json.NewEncoder(w).Encode(result)
     }
 }
@@ -47,7 +48,7 @@ func GetMovie(client *mongo.Client) http.HandlerFunc {
 
         movie, err := services.GetMovie(client, id)
         if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            middlewares.HandleErros(err, w)
             return
         }
 
@@ -65,7 +66,7 @@ func UpdateMovie(client *mongo.Client) http.HandlerFunc {
 
         result, err := services.UpdateMovie(client, id, updateData)
         if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            middlewares.HandleErros(err, w)
             return
         }
 
@@ -78,12 +79,12 @@ func DeleteMovie(client *mongo.Client) http.HandlerFunc {
         params := mux.Vars(r)
         id, _ := primitive.ObjectIDFromHex(params["id"])
 
-        result, err := services.DeleteMovie(client, id)
+        _, err := services.DeleteMovie(client, id)
         if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            middlewares.HandleErros(err, w)
             return
         }
 
-        json.NewEncoder(w).Encode(result)
+        w.WriteHeader(http.StatusNoContent)
     }
 }

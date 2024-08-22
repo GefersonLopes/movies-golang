@@ -55,18 +55,42 @@ func GetMovie(client *mongo.Client, id primitive.ObjectID) (models.Movie, error)
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
+    validateId := middlewares.ValidadeParamSearchMovie(id)
+    if validateId != nil {
+        return models.Movie{}, validateId
+    }
+
     var movie models.Movie
     err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&movie)
+
+    if movie.ID == primitive.NilObjectID {
+        return models.Movie{}, middlewares.ReturnNotFoundMovie()
+    }
+
     return movie, err
 }
 
-func UpdateMovie(client *mongo.Client, id primitive.ObjectID, update bson.M) (*mongo.UpdateResult, error) {
+func UpdateMovie(client *mongo.Client, id primitive.ObjectID, update bson.M) (*models.Movie, error) {
     collection := client.Database("movieDB").Collection("movies")
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
+    validateId := middlewares.ValidadeParamSearchMovie(id)
+    if validateId != nil {
+        return nil, validateId
+    }
+
     result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": update})
-    return result, err
+
+    if result.MatchedCount == 0 {
+        return nil, middlewares.ReturnNotFoundMovie()
+    }
+
+    movie := models.Movie{}
+    collection.FindOne(ctx, bson.M{"_id": id}).Decode(&movie)
+    
+    return &movie, err
+
 }
 
 func DeleteMovie(client *mongo.Client, id primitive.ObjectID) (*mongo.DeleteResult, error) {
@@ -74,6 +98,16 @@ func DeleteMovie(client *mongo.Client, id primitive.ObjectID) (*mongo.DeleteResu
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
+    validateId := middlewares.ValidadeParamSearchMovie(id)
+    if validateId != nil {
+        return nil, validateId
+    }
+
     result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+
+    if result.DeletedCount == 0 {
+        return nil, middlewares.ReturnNotFoundMovie()
+    }
+
     return result, err
 }

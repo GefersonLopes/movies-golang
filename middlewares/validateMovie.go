@@ -4,6 +4,8 @@ import (
 	"golang-movie/models"
 	"net/http"
 	"reflect"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 
@@ -35,3 +37,25 @@ func ValidateCreateMovie(movie models.Movie) error {
 	}
 	return nil
 }
+
+func ValidadeParamSearchMovie(id primitive.ObjectID) error {
+	errosList := []interface{}{"", 0, nil}
+	
+	for _, error := range errosList {
+		if id == error {
+			return &ValidationError{
+				Message: "id is required",
+				StatusCode: http.StatusBadRequest,
+			}
+		}
+	}
+	return nil
+}	
+
+func ReturnNotFoundMovie() error {
+	return &ValidationError{
+		Message: "movie not found",
+		StatusCode: http.StatusNotFound,
+	}
+}
+	
