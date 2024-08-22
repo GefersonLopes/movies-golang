@@ -1,9 +1,7 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Movie struct {
-    ID          primitive.ObjectID `bson:"_id,omitempty"`
+    ID          int64              `bson:"_id,omitempty"`
     Title       string             `bson:"title"`
     Description string             `bson:"description"`
     Director    string             `bson:"director"`

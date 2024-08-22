@@ -1,16 +1,22 @@
 package services
 
 import (
-    "context"
-    "time"
-    
-    "golang-movie/models"
-    "go.mongodb.org/mongo-driver/bson"
-    "go.mongodb.org/mongo-driver/bson/primitive"
-    "go.mongodb.org/mongo-driver/mongo"
+	"context"
+	"time"
+
+	"golang-movie/middlewares"
+	"golang-movie/models"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func CreateMovie(client *mongo.Client, movie models.Movie) (*mongo.InsertOneResult, error) {
+    if err := middlewares.ValidateCreateMovie(movie); err != nil {
+        return nil, err
+    }
+    
     collection := client.Database("movieDB").Collection("movies")
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
@@ -35,6 +41,10 @@ func GetMovies(client *mongo.Client) ([]models.Movie, error) {
         var movie models.Movie
         cursor.Decode(&movie)
         movies = append(movies, movie)
+    }
+
+    if len(movies) == 0 {
+        return []models.Movie{}, nil
     }
 
     return movies, nil

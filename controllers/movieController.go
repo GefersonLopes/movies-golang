@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"golang-movie/middlewares"
 	"golang-movie/models"
 	"golang-movie/services"
 
@@ -19,7 +20,7 @@ func CreateMovie(client *mongo.Client) http.HandlerFunc {
 
         result, err := services.CreateMovie(client, movie)
         if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            middlewares.HandleErros(err, w)
             return
         }
 
